@@ -34,7 +34,9 @@ class MainApp extends StatelessWidget {
       builder: (context, child) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: "ToDo App",
-        theme: ThemeData.dark(useMaterial3: true),
+        darkTheme: ThemeData.dark(useMaterial3: true),
+        theme: ThemeData.light(useMaterial3: true),
+        themeMode: ThemeMode.dark,
         home: TodoScreen(),
       ),
     );

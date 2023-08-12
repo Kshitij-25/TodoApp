@@ -32,22 +32,29 @@ class TodoScreen extends StatelessWidget {
         SizedBox(
           height: ScreenUtility.getHeight(context) * 0.8,
           child: Obx(
-            () => ListView.builder(
-              shrinkWrap: true,
-              itemCount: todoController.todos.length,
-              itemBuilder: (context, index) {
-                final todo = todoController.todos[index];
-                return TodoItems(
-                  todo: todo,
-                  onTodoChanged: (changedTodo) {
-                    todoController.toggleTodoStatus(index);
-                  },
-                  onDeleteItem: (itemId) {
-                    todoController.deleteTodo(index);
-                  },
-                );
-              },
-            ),
+            () => todoController.todos.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Enter New Tasks",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: todoController.todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = todoController.todos[index];
+                      return TodoItems(
+                        todo: todo,
+                        onTodoChanged: (changedTodo) {
+                          todoController.toggleTodoStatus(index);
+                        },
+                        onDeleteItem: (itemId) {
+                          todoController.deleteTodo(index);
+                        },
+                      );
+                    },
+                  ),
           ),
         ),
         Align(

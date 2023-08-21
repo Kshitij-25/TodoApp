@@ -7,10 +7,6 @@ import 'package:todo_app/model/todo.dart';
 import 'package:todo_app/screens/home_screen.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
-var todoList = <ToDo>[].obs;
-var filteredTodoList = <ToDo>[].obs;
-final RxString searchQuery = RxString('');
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
@@ -33,10 +29,10 @@ class MainApp extends StatelessWidget {
       designSize: const Size(360, 690),
       builder: (context, child) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: "ToDo App",
+        title: "TaskTrackr",
         darkTheme: ThemeData.dark(useMaterial3: true),
         theme: ThemeData.light(useMaterial3: true),
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.system,
         home: TodoScreen(),
       ),
     );

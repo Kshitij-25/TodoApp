@@ -6,11 +6,14 @@ import '../model/todo.dart';
 
 class TodoController extends GetxController {
   var todos = <ToDo>[].obs;
+  var filteredTodos = <ToDo>[].obs;
+  var isDarkTheme = false.obs;
 
   RxBool isSliverAppBarExpanded = true.obs;
   ScrollController scrollController = ScrollController();
   Animation<double>? titleAnimation;
   TextEditingController searchController = TextEditingController();
+  TextEditingController todoTextCont = TextEditingController();
 
   @override
   void onInit() {
@@ -22,14 +25,19 @@ class TodoController extends GetxController {
         isSliverAppBarExpanded.value = true;
       }
     });
-    // debounce(searchQuery, (_) => searchTodoItems(),
-    //     time: const Duration(milliseconds: 500));
     _loadTodos();
+  }
+
+  void filterTodos(String query) {
+    filteredTodos.assignAll(todos.where((todo) {
+      return todo.todoText!.toLowerCase().contains(query.toLowerCase());
+    }));
   }
 
   void _loadTodos() async {
     final box = await Hive.openBox<ToDo>('todos');
     todos.assignAll(box.values.toList());
+    filteredTodos.assignAll(todos);
   }
 
   void addTodo(String title) async {

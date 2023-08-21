@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/utility/screen_utility.dart';
+import 'package:todo_app/widgets/search_bar.dart';
 
 import '../constants/colors.dart';
 import '../controllers/homeController.dart';
@@ -9,18 +11,37 @@ import '../widgets/todo_items.dart';
 class TodoScreen extends StatelessWidget {
   TodoScreen({super.key});
 
-  final TodoController todoController = Get.put(TodoController());
-  final TextEditingController todoCont = TextEditingController();
+  var todoController = Get.put(TodoController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
+      backgroundColor: todoController.isDarkTheme.value
+          ? Theme.of(context).primaryColorDark
+          : tdBGColor,
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: const Text(
           "TaskTrackr",
         ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              todoController.isDarkTheme.toggle(); // Toggle the theme variable
+              Get.changeThemeMode(
+                todoController.isDarkTheme.value
+                    ? ThemeMode.dark
+                    : ThemeMode.light,
+              ); //
+            },
+            icon: Icon(
+              todoController.isDarkTheme.value
+                  ? CupertinoIcons.sun_max_fill // Use sun icon for dark theme
+                  : CupertinoIcons.moon_fill, // Use moon icon for light theme
+            ),
+          ),
+        ],
       ),
       body: bodyWiget(context),
     );
@@ -29,86 +50,115 @@ class TodoScreen extends StatelessWidget {
   Widget bodyWiget(context) {
     return Column(
       children: [
-        SizedBox(
-          height: ScreenUtility.getHeight(context) * 0.8,
+        NormalSearchBar(),
+        Expanded(
           child: Obx(
-            () => todoController.todos.isEmpty
-                ? const Center(
-                    child: Text(
-                      "Enter New Tasks",
-                      style: TextStyle(color: Colors.white),
+            () => todoController.filteredTodos.isEmpty
+                ? Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).canvasColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 40,
+                        ),
+                        child: Text(
+                          "Enter New Tasks",
+                          style: TextStyle(
+                            color: todoController.isDarkTheme.value
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
                   )
                 : ListView.builder(
                     shrinkWrap: true,
-                    itemCount: todoController.todos.length,
+                    itemCount: todoController.filteredTodos.length,
                     itemBuilder: (context, index) {
-                      final todo = todoController.todos[index];
+                      final todo = todoController.filteredTodos[index];
                       return TodoItems(
                         todo: todo,
                         onTodoChanged: (changedTodo) {
                           todoController.toggleTodoStatus(index);
                         },
                         onDeleteItem: (itemId) {
-                          todoController.deleteTodo(index);
+                          Get.defaultDialog(
+                            title: "Are you sure?",
+                            middleText: "Are you sure you want to delete?",
+                            onConfirm: () {
+                              todoController.deleteTodo(index);
+                              Get.back();
+                            },
+                            onCancel: () => Get.back(),
+                          );
                         },
                       );
                     },
                   ),
           ),
         ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).canvasColor,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.white,
-                          offset: Offset(0, 0),
-                          blurRadius: 1,
-                          spreadRadius: 0,
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).canvasColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: todoController.isDarkTheme.value
+                                ? Colors.white
+                                : Colors.black,
+                            offset: const Offset(0, 0),
+                            blurRadius: 1,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        autocorrect: false,
+                        controller: todoController.todoTextCont,
+                        decoration: const InputDecoration(
+                          hintText: "Add a new items.",
+                          border: InputBorder.none,
                         ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      autocorrect: false,
-                      controller: todoCont,
-                      decoration: const InputDecoration(
-                        hintText: "Add a new todo item.",
-                        border: InputBorder.none,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: tdBlue,
-                    borderRadius: BorderRadius.circular(5),
+                  const SizedBox(
+                    width: 20,
                   ),
-                  child: IconButton(
-                    onPressed: () {
-                      todoController.addTodo(todoCont.text);
-                      todoCont.clear();
-                    },
-                    icon: const Icon(
-                      Icons.add,
-                      color: Colors.white,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: tdBlue,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        todoController
+                            .addTodo(todoController.todoTextCont.text);
+                        todoController.todoTextCont.clear();
+                      },
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

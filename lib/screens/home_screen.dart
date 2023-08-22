@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/utility/screen_utility.dart';
+import 'package:todo_app/widgets/customButton.dart';
 import 'package:todo_app/widgets/search_bar.dart';
 
 import '../constants/colors.dart';
@@ -23,6 +25,12 @@ class TodoScreen extends StatelessWidget {
         forceMaterialTransparency: true,
         title: const Text(
           "TaskTrackr",
+          style: TextStyle(
+            fontSize: 24,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.08,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -44,6 +52,137 @@ class TodoScreen extends StatelessWidget {
         ],
       ),
       body: bodyWiget(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: CustomButton(
+        label: "ADD TASK",
+        onPressed: () => customBottomSheet(context),
+      ),
+    );
+  }
+
+  Future<dynamic> customBottomSheet(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                      offset: const Offset(0, 0),
+                      blurRadius: 1,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: TextField(
+                  autocorrect: false,
+                  controller: todoController.todoTextCont,
+                  decoration: const InputDecoration(
+                    hintText: "Add new Tasks.",
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              ListTile(
+                onTap: () async {
+                  // final pickedDate = await showDatePicker(
+                  //   context: context,
+                  //   initialDate: todoController.selectedFromDate.value,
+                  //   firstDate: DateTime.now(),
+                  //   lastDate: DateTime(2100),
+                  // );
+                  final pickedDate = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedDate != null) {
+                    todoController.selectedFromDate.value =
+                        pickedDate; // Update the selected date
+                  }
+                },
+                title: const Text(
+                  "FROM",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1.08,
+                  ),
+                ),
+                trailing: Obx(
+                  () => Text(
+                    todoController.selectedFromDate.value.format(context),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.08,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              ListTile(
+                onTap: () async {
+                  final pickedDate = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedDate != null) {
+                    todoController.selectedToDate.value =
+                        pickedDate; // Update the selected date
+                  }
+                },
+                title: const Text(
+                  "TO",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1.08,
+                  ),
+                ),
+                trailing: Obx(
+                  () => Text(
+                    todoController.selectedToDate.value.format(context),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.08,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              CustomButton(
+                label: "ADD TASK",
+                onPressed: () {
+                  todoController.addTodo(todoController.todoTextCont.text);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -66,12 +205,16 @@ class TodoScreen extends StatelessWidget {
                           horizontal: 40,
                         ),
                         child: Text(
-                          "Enter New Tasks",
+                          "No Tasks",
                           style: TextStyle(
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Colors.white
                                     : Colors.black,
+                            fontSize: 18,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.08,
                           ),
                         ),
                       ),
@@ -103,67 +246,67 @@ class TodoScreen extends StatelessWidget {
                   ),
           ),
         ),
-        SafeArea(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).canvasColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                            offset: const Offset(0, 0),
-                            blurRadius: 1,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        autocorrect: false,
-                        controller: todoController.todoTextCont,
-                        decoration: const InputDecoration(
-                          hintText: "Add new Tasks.",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: tdBlue,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        todoController
-                            .addTodo(todoController.todoTextCont.text);
-                        // todoController.todoTextCont.clear();
-                      },
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        // SafeArea(
+        //   child: Align(
+        //     alignment: Alignment.bottomCenter,
+        //     child: Padding(
+        //       padding: const EdgeInsets.symmetric(horizontal: 20),
+        //       child: Row(
+        //         children: [
+        //           Expanded(
+        //             child: Container(
+        //               padding: const EdgeInsets.symmetric(
+        //                   horizontal: 15, vertical: 5),
+        //               decoration: BoxDecoration(
+        //                 color: Theme.of(context).canvasColor,
+        //                 boxShadow: [
+        //                   BoxShadow(
+        //                     color:
+        //                         Theme.of(context).brightness == Brightness.dark
+        //                             ? Colors.white
+        //                             : Colors.black,
+        //                     offset: const Offset(0, 0),
+        //                     blurRadius: 1,
+        //                     spreadRadius: 0,
+        //                   ),
+        //                 ],
+        //                 borderRadius: BorderRadius.circular(10),
+        //               ),
+        //               child: TextField(
+        //                 autocorrect: false,
+        //                 controller: todoController.todoTextCont,
+        //                 decoration: const InputDecoration(
+        //                   hintText: "Add new Tasks.",
+        //                   border: InputBorder.none,
+        //                 ),
+        //               ),
+        //             ),
+        //           ),
+        //           const SizedBox(
+        //             width: 20,
+        //           ),
+        //           Container(
+        //             decoration: BoxDecoration(
+        //               color: tdBlue,
+        //               borderRadius: BorderRadius.circular(5),
+        //             ),
+        //             child: IconButton(
+        //               onPressed: () {
+        //                 todoController
+        //                     .addTodo(todoController.todoTextCont.text);
+        //                 // todoController.todoTextCont.clear();
+        //               },
+        //               icon: const Icon(
+        //                 Icons.add,
+        //                 color: Colors.white,
+        //               ),
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

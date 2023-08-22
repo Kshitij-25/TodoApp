@@ -9,6 +9,9 @@ class TodoController extends GetxController {
   var filteredTodos = <ToDo>[].obs;
   var isDarkTheme = Get.isDarkMode.obs;
 
+  var selectedFromDate = TimeOfDay.now().obs;
+  var selectedToDate = TimeOfDay.now().obs;
+
   RxBool isSliverAppBarExpanded = true.obs;
   ScrollController scrollController = ScrollController();
   Animation<double>? titleAnimation;

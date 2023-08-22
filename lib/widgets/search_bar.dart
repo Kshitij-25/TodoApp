@@ -21,7 +21,9 @@ class NormalSearchBar extends StatelessWidget {
         decoration: InputDecoration(
           prefixIcon: Icon(
             Icons.search,
-            color: _homeCont.isDarkTheme.value ? Colors.white : Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
           hintText: "Search",
           border: OutlineInputBorder(

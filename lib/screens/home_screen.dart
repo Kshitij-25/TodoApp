@@ -16,7 +16,7 @@ class TodoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: todoController.isDarkTheme.value
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? Theme.of(context).primaryColorDark
           : tdBGColor,
       appBar: AppBar(
@@ -28,17 +28,17 @@ class TodoScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              todoController.isDarkTheme.toggle(); // Toggle the theme variable
+              todoController.isDarkTheme.toggle();
               Get.changeThemeMode(
-                todoController.isDarkTheme.value
-                    ? ThemeMode.dark
-                    : ThemeMode.light,
-              ); //
+                Theme.of(context).brightness == Brightness.dark
+                    ? ThemeMode.light
+                    : ThemeMode.dark,
+              );
             },
             icon: Icon(
-              todoController.isDarkTheme.value
-                  ? CupertinoIcons.sun_max_fill // Use sun icon for dark theme
-                  : CupertinoIcons.moon_fill, // Use moon icon for light theme
+              Theme.of(context).brightness == Brightness.dark
+                  ? CupertinoIcons.moon_fill
+                  : CupertinoIcons.sun_max_fill,
             ),
           ),
         ],
@@ -68,9 +68,10 @@ class TodoScreen extends StatelessWidget {
                         child: Text(
                           "Enter New Tasks",
                           style: TextStyle(
-                            color: todoController.isDarkTheme.value
-                                ? Colors.white
-                                : Colors.black,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                           ),
                         ),
                       ),
@@ -117,9 +118,10 @@ class TodoScreen extends StatelessWidget {
                         color: Theme.of(context).canvasColor,
                         boxShadow: [
                           BoxShadow(
-                            color: todoController.isDarkTheme.value
-                                ? Colors.white
-                                : Colors.black,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                             offset: const Offset(0, 0),
                             blurRadius: 1,
                             spreadRadius: 0,
@@ -131,7 +133,7 @@ class TodoScreen extends StatelessWidget {
                         autocorrect: false,
                         controller: todoController.todoTextCont,
                         decoration: const InputDecoration(
-                          hintText: "Add a new items.",
+                          hintText: "Add new Tasks.",
                           border: InputBorder.none,
                         ),
                       ),
@@ -149,7 +151,7 @@ class TodoScreen extends StatelessWidget {
                       onPressed: () {
                         todoController
                             .addTodo(todoController.todoTextCont.text);
-                        todoController.todoTextCont.clear();
+                        // todoController.todoTextCont.clear();
                       },
                       icon: const Icon(
                         Icons.add,

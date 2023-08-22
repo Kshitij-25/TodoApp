@@ -7,7 +7,7 @@ import '../model/todo.dart';
 class TodoController extends GetxController {
   var todos = <ToDo>[].obs;
   var filteredTodos = <ToDo>[].obs;
-  var isDarkTheme = false.obs;
+  var isDarkTheme = Get.isDarkMode.obs;
 
   RxBool isSliverAppBarExpanded = true.obs;
   ScrollController scrollController = ScrollController();
@@ -37,14 +37,16 @@ class TodoController extends GetxController {
   void _loadTodos() async {
     final box = await Hive.openBox<ToDo>('todos');
     todos.assignAll(box.values.toList());
-    filteredTodos.assignAll(todos);
+    filterTodos(searchController.text); // Update filteredTodos
   }
 
   void addTodo(String title) async {
     final box = await Hive.openBox<ToDo>('todos');
     final todo = ToDo(todoText: title);
     await box.add(todo);
-    todos.add(todo);
+    todos.add(todo); // Use todos.add to update the list
+    filterTodos(searchController.text); // Update filteredTodos
+    todoTextCont.clear();
   }
 
   void toggleTodoStatus(int index) async {
@@ -53,11 +55,14 @@ class TodoController extends GetxController {
     todo.isCompleted = !todo.isCompleted;
     await box.putAt(index, todo);
     todos[index] = todo;
+
+    filterTodos(searchController.text); // Update filteredTodos
   }
 
   void deleteTodo(int index) async {
     final box = await Hive.openBox<ToDo>('todos');
     await box.deleteAt(index);
-    todos.removeAt(index);
+    todos.removeAt(index); // Update todos list
+    filterTodos(searchController.text); // Update filteredTodos
   }
 }

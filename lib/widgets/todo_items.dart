@@ -3,17 +3,30 @@ import 'package:todo_app/constants/colors.dart';
 import 'package:todo_app/model/todo.dart';
 import 'package:todo_app/utility/screen_utility.dart';
 
+// ignore: must_be_immutable
 class TodoItems extends StatelessWidget {
-  TodoItems(
-      {super.key,
-      required this.todo,
-      required this.onTodoChanged,
-      required this.onDeleteItem});
+  TodoItems({
+    super.key,
+    required this.todo,
+    required this.onTodoChanged,
+    required this.onDeleteItem,
+    // ignore: non_constant_identifier_names
+    this.fromTime,
+    // ignore: non_constant_identifier_names
+    this.toTime,
+  });
 
   // final todoList = ToDo.todoList();
   final ToDo todo;
+  // ignore: prefer_typing_uninitialized_variables
   final onTodoChanged;
+  // ignore: prefer_typing_uninitialized_variables
   final onDeleteItem;
+
+  // ignore: non_constant_identifier_names
+  String? fromTime;
+  // ignore: non_constant_identifier_names
+  String? toTime;
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +48,21 @@ class TodoItems extends StatelessWidget {
               title: Text(
                 todo.todoText!,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.08,
                   decoration: todo.isCompleted
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
                 ),
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("From : $fromTime"),
+                  Text("To : $toTime"),
+                ],
               ),
               leading: Icon(
                 todo.isCompleted

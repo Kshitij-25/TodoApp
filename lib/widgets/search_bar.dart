@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../constants/colors.dart';
 import '../controllers/homeController.dart';
-import '../main.dart';
 
 class NormalSearchBar extends StatelessWidget {
   final TodoController _homeCont = Get.put(TodoController());
+
+  NormalSearchBar({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -13,6 +13,7 @@ void main() async {
   Hive.init(appDocumentDir.path);
   await Hive.initFlutter();
   Hive.registerAdapter(ToDoAdapter());
+  Hive.registerAdapter(TimeOfDayAdapter());
   await Hive.openBox<ToDo>('todos');
   runApp(const MainApp());
 }

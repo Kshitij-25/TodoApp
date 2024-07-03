@@ -1,263 +1,124 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:todo_app/utility/screen_utility.dart';
-import 'package:todo_app/widgets/customButton.dart';
-import 'package:todo_app/widgets/search_bar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:svg_flutter/svg_flutter.dart';
 
-import '../constants/colors.dart';
-import '../controllers/homeController.dart';
+import '../constants/assets.dart';
+import '../constants/strings.dart';
+import '../constants/utils/date_time_utils.dart';
+import '../constants/utils/padding_utils.dart';
+import '../constants/utils/sized_box_utils.dart';
 import '../widgets/todo_items.dart';
+import 'create_task_screen.dart';
 
-class TodoScreen extends StatelessWidget {
-  TodoScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
-  var todoController = Get.put(TodoController());
+  static const routeName = '/homeScreen';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? Theme.of(context).primaryColorDark
-          : tdBGColor,
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: const Text(
+        title: Text(
           "TaskTrackr",
-          style: TextStyle(
-            fontSize: 24,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w500,
-            letterSpacing: 1.08,
-          ),
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           IconButton(
-            onPressed: () {
-              todoController.isDarkTheme.toggle();
-              Get.changeThemeMode(
-                Theme.of(context).brightness == Brightness.dark
-                    ? ThemeMode.light
-                    : ThemeMode.dark,
-              );
-            },
+            onPressed: () {},
             icon: Icon(
-              Theme.of(context).brightness == Brightness.dark
-                  ? CupertinoIcons.moon_fill
-                  : CupertinoIcons.sun_max_fill,
+              Theme.of(context).brightness == Brightness.light ? CupertinoIcons.moon_fill : CupertinoIcons.sun_max_fill,
             ),
           ),
         ],
       ),
-      body: bodyWiget(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: CustomButton(
-        label: "ADD TASK",
-        onPressed: () => customBottomSheet(context),
-      ),
-    );
-  }
-
-  Future<dynamic> customBottomSheet(BuildContext context) {
-    return showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SizedBox(
-          height: ScreenUtility.getHeight(context) * 0.4,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).canvasColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        offset: const Offset(0, 0),
-                        blurRadius: 1,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(10),
+      body: SafeArea(
+        child: Padding(
+          padding: PaddingUtils.horizontalMedium,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                Strings.readyForTasks,
+                style: Theme.of(context).textTheme.displayMedium,
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Today's",
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  child: TextField(
-                    autocorrect: false,
-                    controller: todoController.todoTextCont,
-                    decoration: const InputDecoration(
-                      hintText: "Add new Tasks.",
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 24,
-                ),
-                ListTile(
-                  onTap: () async {
-                    final pickedDate = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                    );
-                    if (pickedDate != null) {
-                      todoController.selectedFromTime.value =
-                          pickedDate; // Update the selected date
-                    }
-                  },
-                  title: const Text(
-                    "FROM",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.08,
-                    ),
-                  ),
-                  trailing: Obx(
-                    () => Text(
-                      todoController.selectedFromTime.value.format(context),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.08,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 24,
-                ),
-                ListTile(
-                  onTap: () async {
-                    final pickedDate = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                    );
-                    if (pickedDate != null) {
-                      todoController.selectedToTime.value =
-                          pickedDate; // Update the selected date
-                    }
-                  },
-                  title: const Text(
-                    "TO",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.08,
-                    ),
-                  ),
-                  trailing: Obx(
-                    () => Text(
-                      todoController.selectedToTime.value.format(context),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.08,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 24,
-                ),
-                CustomButton(
-                  label: "ADD TASK",
-                  onPressed: () {
-                    if (todoController.todoTextCont.text != "") {
-                      todoController.addTodo(todoController.todoTextCont.text);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget bodyWiget(context) {
-    return Column(
-      children: [
-        NormalSearchBar(),
-        Expanded(
-          child: Obx(
-            () => todoController.filteredTodos.isEmpty
-                ? Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).canvasColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 40,
-                        ),
-                        child: Text(
-                          "No Tasks",
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1.08,
-                          ),
-                        ),
+                  TextButton(
+                    onPressed: () {},
+                    style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                    child: Text(
+                      DateTimeUtils.formatDay(
+                        DateTime.now(),
                       ),
                     ),
                   )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: todoController.filteredTodos.length,
-                    itemBuilder: (context, index) {
-                      final todo = todoController.filteredTodos[index];
-                      final fromTime = formatTimeOfDay(todo.fromTime!);
-                      final toTime = formatTimeOfDay(todo.toTime!);
-                      return TodoItems(
-                        todo: todo,
-                        fromTime: fromTime,
-                        toTime: toTime,
-                        onTodoChanged: (changedTodo) {
-                          todoController.toggleTodoStatus(index);
-                        },
-                        onDeleteItem: (itemId) {
-                          Get.defaultDialog(
-                            title: "Are you sure?",
-                            middleText: "Are you sure you want to delete?",
-                            onConfirm: () {
-                              todoController.deleteTodo(index);
-                              Get.back();
-                            },
-                            onCancel: () => Get.back(),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                ],
+              ),
+              Text(
+                DateTimeUtils.formatDate(
+                  DateTime.now(),
+                ),
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              SizedBoxUtils.verticalMedium,
+              Expanded(
+                // child: NoTasksFound(),
+                child: ListView.builder(
+                  itemCount: 10,
+                  itemBuilder: (context, index) {
+                    return const TodoItems();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).push(CreateTaskScreen.routeName);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class NoTasksFound extends StatelessWidget {
+  const NoTasksFound({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SvgPicture.asset(
+          Assets.emptyFolder,
+          height: 100,
+        ),
+        SizedBoxUtils.verticalMedium,
+        Opacity(
+          opacity: 0.2,
+          child: Text(
+            'No Tasks Found',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
           ),
         ),
       ],
     );
   }
-}
-
-String formatTimeOfDay(TimeOfDay timeOfDay) {
-  final now = DateTime.now();
-  final dateTime =
-      DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
-  final formattedTime = DateFormat.jm().format(dateTime);
-  return formattedTime;
 }

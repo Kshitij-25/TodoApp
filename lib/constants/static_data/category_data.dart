@@ -1,0 +1,28 @@
+import 'package:flutter/material.dart';
+
+final List<Map<String, dynamic>> categoryIcons = [
+  {"category": "Appointments", "icon": Icons.event, "color": Colors.teal},
+  {"category": "Career Goals", "icon": Icons.business_center, "color": Colors.deepPurple},
+  {"category": "Community Projects", "icon": Icons.people, "color": Colors.orange},
+  {"category": "Daily Routines", "icon": Icons.access_alarm, "color": Colors.deepOrange},
+  {"category": "Extracurricular Activities", "icon": Icons.sports_basketball, "color": Colors.deepPurple},
+  {"category": "Finance & Budget", "icon": Icons.attach_money, "color": Colors.blue},
+  {"category": "Health & Fitness", "icon": Icons.directions_run, "color": Colors.red},
+  {"category": "Hobbies & Leisure", "icon": Icons.sports_soccer, "color": Colors.deepOrange},
+  {"category": "Home & Household", "icon": Icons.home, "color": Colors.green},
+  {"category": "Life Goals", "icon": Icons.star_half, "color": Colors.blueGrey},
+  {"category": "Mental Health", "icon": Icons.mood, "color": Colors.lightBlue},
+  {"category": "Networking", "icon": Icons.group, "color": Colors.orange},
+  {"category": "Personal Projects", "icon": Icons.work_outline, "color": Colors.amber},
+  {"category": "Physical Health", "icon": Icons.local_hospital, "color": Colors.red},
+  {"category": "Productivity & Organization", "icon": Icons.check_circle, "color": Colors.green},
+  {"category": "Reminders", "icon": Icons.notifications, "color": Colors.red},
+  {"category": "Shopping", "icon": Icons.shopping_cart, "color": Colors.blue},
+  {"category": "Skill Development", "icon": Icons.star, "color": Colors.amber},
+  {"category": "Social & Relationships", "icon": Icons.favorite, "color": Colors.pink},
+  {"category": "Study & Learning", "icon": Icons.school, "color": Colors.indigo},
+  {"category": "Travel & Transportation", "icon": Icons.airplanemode_active, "color": Colors.deepOrange},
+  {"category": "Weekly Planning", "icon": Icons.calendar_today, "color": Colors.green},
+  {"category": "Wishlist", "icon": Icons.favorite_border, "color": Colors.pink},
+  {"category": "Work & Career", "icon": Icons.work, "color": Colors.blueGrey},
+];

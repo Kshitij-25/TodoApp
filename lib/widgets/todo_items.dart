@@ -1,92 +1,97 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants/colors.dart';
-import 'package:todo_app/model/todo.dart';
-import 'package:todo_app/utility/screen_utility.dart';
+import 'package:todo_app/constants/utils/date_time_utils.dart';
+import 'package:todo_app/constants/utils/padding_utils.dart';
+import 'package:todo_app/constants/utils/sized_box_utils.dart';
 
 // ignore: must_be_immutable
 class TodoItems extends StatelessWidget {
-  TodoItems({
+  const TodoItems({
     super.key,
-    required this.todo,
-    required this.onTodoChanged,
-    required this.onDeleteItem,
-    // ignore: non_constant_identifier_names
-    this.fromTime,
-    // ignore: non_constant_identifier_names
-    this.toTime,
   });
-
-  // final todoList = ToDo.todoList();
-  final ToDo todo;
-  // ignore: prefer_typing_uninitialized_variables
-  final onTodoChanged;
-  // ignore: prefer_typing_uninitialized_variables
-  final onDeleteItem;
-
-  // ignore: non_constant_identifier_names
-  String? fromTime;
-  // ignore: non_constant_identifier_names
-  String? toTime;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: ScreenUtility.getWidth(context) * 0.84,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: ListTile(
-              onTap: () {
-                onTodoChanged(todo);
-              },
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              tileColor: Theme.of(context).canvasColor,
-              title: Text(
-                todo.todoText!,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 1.08,
-                  decoration: todo.isCompleted
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                ),
+    return Card(
+      child: Padding(
+        padding: PaddingUtils.largePadding,
+        child: Row(
+          children: [
+            Container(
+              width: 35,
+              height: 35,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(120),
+                // color: purpose['color'].withOpacity(0.3),
+                border: Border.all(
+                    // color: purpose['color'],
+                    ),
               ),
-              subtitle: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: const Icon(
+                Icons.check_box,
+                color: Colors.green,
+              ),
+            ),
+            Padding(
+              padding: PaddingUtils.horizontalLarge,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("From : $fromTime"),
-                  Text("To : $toTime"),
+                  Text(
+                    "Go To Gym",
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.clock,
+                        size: 15,
+                      ),
+                      SizedBoxUtils.horizontalSmall,
+                      Text(
+                        "10:00 AM - 11:00 AM",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "Due Date: ${DateTimeUtils.formatDate(DateTime.now())}",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
-              leading: Icon(
-                todo.isCompleted
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
-                color: tdBlue,
-              ),
             ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-              color: tdRed, borderRadius: BorderRadius.circular(5)),
-          child: IconButton(
-            onPressed: () {
-              onDeleteItem(todo.id);
-            },
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
+            const Spacer(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryFixedDim,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: PaddingUtils.symmetric(horizontal: 10, vertical: 5),
+                    child: Text(
+                      'High',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.black,
+                          ),
+                    ),
+                  ),
+                ),
+                SizedBoxUtils.verticalMedium,
+                Text(
+                  'In Progress',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

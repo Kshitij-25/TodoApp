@@ -1,0 +1,5 @@
+class Assets {
+  const Assets._();
+
+  static const emptyFolder = 'assets/empty_folder.svg';
+}

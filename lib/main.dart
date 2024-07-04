@@ -1,22 +1,24 @@
+import 'dart:developer' as devtools show log;
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:todo_app/model/todo.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todo_app/firebase_options.dart';
 
 import 'app/todo_app.dart';
+
+extension Log on Object {
+  void log() => devtools.log(toString());
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  Hive.init(appDocumentDir.path);
-  await Hive.initFlutter();
-
-  Hive.registerAdapter(ToDoAdapter());
-  Hive.registerAdapter(TimeOfDayAdapter());
-
-  await Hive.openBox<ToDo>('todos');
-
-  runApp(const TodoApp());
+  runApp(const ProviderScope(
+    child: TodoApp(),
+  ));
 }

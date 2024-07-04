@@ -6,9 +6,9 @@ import 'package:todo_app/constants/static_data/category_data.dart';
 import 'package:todo_app/constants/utils/app_utility.dart';
 import 'package:todo_app/constants/utils/padding_utils.dart';
 import 'package:todo_app/constants/utils/validation_utils.dart';
-import 'package:todo_app/widgets/custom_button.dart';
+import 'package:todo_app/presentation/widgets/custom_button.dart';
 
-import '../constants/utils/sized_box_utils.dart';
+import '../../constants/utils/sized_box_utils.dart';
 import '../widgets/custom_text_form_field.dart';
 
 class CreateTaskScreen extends StatelessWidget {
@@ -29,7 +29,9 @@ class CreateTaskScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             'Create New Task',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           leading: IconButton(
             icon: const Icon(CupertinoIcons.clear),

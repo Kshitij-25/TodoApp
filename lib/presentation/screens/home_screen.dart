@@ -1,23 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:svg_flutter/svg_flutter.dart';
 
-import '../constants/assets.dart';
-import '../constants/strings.dart';
-import '../constants/utils/date_time_utils.dart';
-import '../constants/utils/padding_utils.dart';
-import '../constants/utils/sized_box_utils.dart';
+import '../../constants/assets.dart';
+import '../../constants/strings.dart';
+import '../../constants/utils/date_time_utils.dart';
+import '../../constants/utils/padding_utils.dart';
+import '../../constants/utils/sized_box_utils.dart';
 import '../widgets/todo_items.dart';
 import 'create_task_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const routeName = '/homeScreen';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -84,9 +85,13 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          GoRouter.of(context).push(CreateTaskScreen.routeName);
+          GoRouter.of(context).pushNamed(CreateTaskScreen.routeName);
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(
+          Icons.add,
+          color: Theme.of(context).colorScheme.onInverseSurface,
+        ),
       ),
     );
   }

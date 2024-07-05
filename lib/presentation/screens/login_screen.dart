@@ -3,13 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/constants/assets.dart';
 import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
-import 'package:todo_app/constants/utils/padding_utils.dart';
-import 'package:todo_app/constants/utils/sized_box_utils.dart';
 import 'package:todo_app/data/models/login_state.dart';
 import 'package:todo_app/main.dart';
-import 'package:todo_app/presentation/notifier/auth_state_notifer.dart';
+import 'package:todo_app/presentation/providers/auth_state_notifer.dart';
 import 'package:todo_app/presentation/screens/home_screen.dart';
 import 'package:todo_app/presentation/widgets/custom_button.dart';
+
+import '../../constants/utils/padding_utils.dart';
+import '../../constants/utils/sized_box_utils.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -54,12 +55,11 @@ class LoginScreen extends ConsumerWidget {
                     label: 'Sign in with Google',
                     onPressed: () async {
                       await ref.read(authStateNotifierProvider.notifier).loginWithGoogle();
-                      if (loginState == LoginState.success) {
-                        loginState.log();
+                      if (ref.read(authStateNotifierProvider) == LoginState.success) {
                         GoRouter.of(context).goNamed(HomeScreen.routeName);
                         context.showSnackbar('Login Successful');
                       } else {
-                        loginState.log();
+                        ref.read(authStateNotifierProvider).log();
                         context.showSnackbar('Something went wrong');
                       }
                     },

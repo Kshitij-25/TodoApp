@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todo_app/constants/extensions/screen_size_ext.dart';
 import 'package:todo_app/constants/static_data/category_data.dart';
 import 'package:todo_app/constants/utils/app_utility.dart';
@@ -9,20 +11,56 @@ import 'package:todo_app/constants/utils/validation_utils.dart';
 import 'package:todo_app/presentation/widgets/custom_button.dart';
 
 import '../../constants/utils/sized_box_utils.dart';
+import '../../data/backend/task_service.dart';
+import '../providers/state_providers.dart';
 import '../widgets/custom_text_form_field.dart';
 
-class CreateTaskScreen extends StatelessWidget {
+class CreateTaskScreen extends ConsumerWidget {
   CreateTaskScreen({super.key});
 
   static const routeName = '/createTaskScreen';
 
   static final _formKey = GlobalKey<FormState>();
 
+  final _taskService = TaskService();
+
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  Future<void> _createTask(BuildContext context, WidgetRef ref) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      final scheduleDate = ref.read(scheduleDateProvider.notifier).state;
+      final startTime = ref.read(startTimeProvider.notifier).state;
+      final endTime = ref.read(endTimeProvider.notifier).state;
+      final priority = ref.read(priorityProvider.notifier).state;
+      final purpose = ref.read(purposeProvider.notifier).state;
+      final reminder = ref.read(reminderProvider.notifier).state;
+
+      if (scheduleDate == null || startTime == null || endTime == null || priority == null || purpose == null || reminder == null) {
+        // Handle the case where some fields are not filled
+        return;
+      }
+
+      await _taskService.createTask(
+        userId: userId,
+        scheduleDate: scheduleDate,
+        title: _titleController.text,
+        purpose: purpose,
+        startTime: startTime,
+        endTime: endTime,
+        description: _descriptionController.text,
+        reminder: reminder,
+      );
+
+      // Show a success message or navigate to another screen
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () => AppUtility.hideKeyboard(),
       child: Scaffold(
@@ -109,20 +147,25 @@ class CreateTaskScreen extends StatelessWidget {
                                 children: categoryIcons.map((purpose) {
                                   return Tooltip(
                                     message: purpose['category'],
-                                    child: Container(
-                                      width: 35,
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(120),
-                                        color: purpose['color'].withOpacity(0.3),
-                                        border: Border.all(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        ref.read(purposeProvider.notifier).state = purpose['category'];
+                                      },
+                                      child: Container(
+                                        width: 35,
+                                        margin: const EdgeInsets.only(right: 8),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(120),
+                                          color: purpose['color'].withOpacity(0.3),
+                                          border: Border.all(
+                                            color: purpose['color'],
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          purpose['icon'],
+                                          size: 20,
                                           color: purpose['color'],
                                         ),
-                                      ),
-                                      child: Icon(
-                                        purpose['icon'],
-                                        size: 20,
-                                        color: purpose['color'],
                                       ),
                                     ),
                                   );
@@ -145,7 +188,9 @@ class CreateTaskScreen extends StatelessWidget {
                                 size: 18,
                                 color: Theme.of(context).colorScheme.tertiaryContainer,
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                _selectTime(context, ref, isStartTime: true);
+                              },
                             ),
                           ),
                           SizedBoxUtils.horizontalMedium,
@@ -159,7 +204,9 @@ class CreateTaskScreen extends StatelessWidget {
                                 size: 18,
                                 color: Theme.of(context).colorScheme.tertiaryContainer,
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                _selectTime(context, ref, isStartTime: false);
+                              },
                             ),
                           ),
                         ],
@@ -210,15 +257,25 @@ class CreateTaskScreen extends StatelessWidget {
                           ),
                           const Spacer(),
                           Switch.adaptive(
-                            value: true,
-                            onChanged: (value) {},
-                          )
+                            value: ref.watch(reminderProvider.notifier).state != null,
+                            onChanged: (value) {
+                              if (value) {
+                                // Set a default reminder time if the switch is turned on
+                                ref.read(reminderProvider.notifier).state = DateTime.now().add(const Duration(hours: 1));
+                              } else {
+                                // Set reminder to null if the switch is turned off
+                                ref.read(reminderProvider.notifier).state = null;
+                              }
+                            },
+                          ),
                         ],
                       ),
                       const Spacer(),
                       CustomButton(
                         label: 'Create Task',
-                        onPressed: () {},
+                        onPressed: () async {
+                          await _createTask(context, ref);
+                        },
                       ),
                     ],
                   ),
@@ -243,6 +300,24 @@ class CreateTaskScreen extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+    }
+  }
+
+  _selectTime(BuildContext context, WidgetRef ref, {required bool isStartTime}) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (picked != null) {
+      final now = DateTime.now();
+      final dateTime = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
+
+      if (isStartTime) {
+        ref.read(startTimeProvider.notifier).state = dateTime;
+      } else {
+        ref.read(endTimeProvider.notifier).state = dateTime;
+      }
     }
   }
 

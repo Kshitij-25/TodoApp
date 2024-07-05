@@ -27,6 +27,7 @@ class AuthStateNotifier extends StateNotifier<LoginState> {
   }
 }
 
+
 // class AuthStateNotifier extends StateNotifier<AuthState> {
 //   final _authenticator = const Authenticator();
 

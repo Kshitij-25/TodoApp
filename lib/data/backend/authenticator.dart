@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:todo_app/main.dart';
 
 import '../models/login_state.dart';
 
@@ -17,7 +17,7 @@ class Authenticator {
   bool get isAlreadyLoggedIn => userId != null;
 
   // Getter to retrieve the display name of the current user, or an empty string if not available
-  String get disaplyName => currentUser?.displayName ?? '';
+  String get displayName => currentUser?.displayName ?? '';
 
   // Getter to retrieve the email of the current user, or null if not available
   String? get email => currentUser?.email;
@@ -38,7 +38,6 @@ class Authenticator {
     final signInAccount = await googleSignIn.signIn();
 
     if (signInAccount == null) {
-      signInAccount!.log();
       return LoginState.error;
     }
 
@@ -52,9 +51,31 @@ class Authenticator {
 
     try {
       await FirebaseAuth.instance.signInWithCredential(oAuthCredential);
+      final user = currentUser;
+      if (user != null) {
+        await _storeUserInFirestore(user);
+      }
       return LoginState.success;
     } catch (e) {
       return LoginState.error;
+    }
+  }
+
+  Future<void> _storeUserInFirestore(User user) async {
+    try {
+      final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+      final userSnapshot = await userDoc.get();
+
+      if (!userSnapshot.exists) {
+        await userDoc.set({
+          'uid': user.uid,
+          'displayName': user.displayName ?? '',
+          'email': user.email ?? '',
+        });
+      }
+    } catch (e) {
+      print('Error storing user in Firestore: $e');
+      rethrow;
     }
   }
 }

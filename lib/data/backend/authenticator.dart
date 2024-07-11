@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:todo_app/main.dart';
 
 import '../models/login_state.dart';
 
@@ -25,8 +26,12 @@ class Authenticator {
   String? get email => currentUser?.email;
 
   Future<void> logOut() async {
-    await FirebaseAuth.instance.signOut(); // Sign out from FirebaseAuth
-    await GoogleSignIn().signOut(); // Sign out from GoogleSignIn
+    try {
+      await GoogleSignIn().signOut(); // Sign out from GoogleSignIn
+      await FirebaseAuth.instance.signOut(); // Sign out from FirebaseAuth
+    } catch (e) {
+      e.log();
+    }
   }
 
   Future<LoginState> loginWithGoogle() async {

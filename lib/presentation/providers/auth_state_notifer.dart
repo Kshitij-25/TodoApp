@@ -25,6 +25,12 @@ class AuthStateNotifier extends StateNotifier<LoginState> {
       state = LoginState.error;
     }
   }
+
+  Future<void> logOut() async {
+    state = LoginState.loading;
+    await _authenticator.logOut();
+    state = LoginState.success;
+  }
 }
 
 

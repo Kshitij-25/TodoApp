@@ -1,19 +1,50 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:todo_app/constants/utils/date_time_utils.dart';
 import 'package:todo_app/constants/utils/padding_utils.dart';
 import 'package:todo_app/constants/utils/sized_box_utils.dart';
 import 'package:todo_app/presentation/screens/view_task_screen.dart';
+
+import '../../constants/static_data/category_data.dart';
 
 // ignore: must_be_immutable
 class TodoItems extends StatelessWidget {
   const TodoItems({
     super.key,
+    this.task,
   });
+
+  final DocumentSnapshot<Object?>? task;
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+
+    // Parse string time to DateTime
+    DateTime parseTime(String timeStr) {
+      final List<String> parts = timeStr.split(':');
+      final int hour = int.parse(parts[0]);
+      final int minute = int.parse(parts[1]);
+      return DateTime(now.year, now.month, now.day, hour, minute);
+    }
+
+    // Retrieve and parse startTime and endTime
+    final DateTime startTime = parseTime(task?['startTime']);
+    final DateTime endTime = parseTime(task?['endTime']);
+
+    // Helper function to get the category icon based on purpose
+    IconData getCategoryIcon(String purpose) {
+      final category = categoryIcons.firstWhere((element) => element['category'] == purpose, orElse: () => {"icon": Icons.check_circle})['icon'];
+      return category;
+    }
+
+// Helper function to get the category color based on purpose
+    Color getCategoryColor(String purpose) {
+      final color = categoryIcons.firstWhere((element) => element['category'] == purpose, orElse: () => {"color": Colors.green})['color'];
+      return color;
+    }
+
     return GestureDetector(
       onTap: () {
         GoRouter.of(context).pushNamed(ViewTaskScreen.routeName);
@@ -24,18 +55,21 @@ class TodoItems extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 35,
-                height: 35,
+                width: 45,
+                height: 45,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(120),
-                  // color: purpose['color'].withOpacity(0.3),
+                  color: getCategoryColor(task?['purpose']).withOpacity(0.3),
                   border: Border.all(
-                      // color: purpose['color'],
-                      ),
+                    color: getCategoryColor(task?['purpose']),
+                    width: 2,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.check_box,
-                  color: Colors.green,
+                child: Center(
+                  child: Icon(
+                    getCategoryIcon(task?['purpose']),
+                    color: getCategoryColor(task?['purpose']),
+                  ),
                 ),
               ),
               Padding(
@@ -44,7 +78,7 @@ class TodoItems extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Go To Gym",
+                      task?['title'] ?? '',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -57,13 +91,13 @@ class TodoItems extends StatelessWidget {
                         ),
                         SizedBoxUtils.horizontalSmall,
                         Text(
-                          "10:00 AM - 11:00 AM",
+                          "${task?['startTime']} - ${task?['endTime']}",
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
                     Text(
-                      "Due Date: ${DateTimeUtils.formatDate(DateTime.now())}",
+                      "Due Date: ${task?['scheduleDate']}",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -81,7 +115,7 @@ class TodoItems extends StatelessWidget {
                     child: Padding(
                       padding: PaddingUtils.symmetric(horizontal: 10, vertical: 5),
                       child: Text(
-                        'High',
+                        task?['priority'] ?? '',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.black,
                             ),
@@ -90,7 +124,11 @@ class TodoItems extends StatelessWidget {
                   ),
                   SizedBoxUtils.verticalMedium,
                   Text(
-                    'In Progress',
+                    now.isBefore(startTime)
+                        ? 'Upcoming'
+                        : now.isAfter(endTime)
+                            ? 'Completed'
+                            : 'In Progress',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

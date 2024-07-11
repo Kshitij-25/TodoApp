@@ -36,7 +36,7 @@ class AppRoutes {
       GoRoute(
         name: HomeScreen.routeName,
         path: HomeScreen.routeName,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => HomeScreen(),
       ),
       GoRoute(
         name: CreateTaskScreen.routeName,

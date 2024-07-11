@@ -23,7 +23,9 @@ class TodoApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: "TaskTrackr",
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      themeMode: ThemeMode.system,
+      darkTheme: theme.dark(),
+      theme: theme.light(),
       routeInformationParser: AppRoutes.router.routeInformationParser,
       routerDelegate: AppRoutes.router.routerDelegate,
       routeInformationProvider: AppRoutes.router.routeInformationProvider,

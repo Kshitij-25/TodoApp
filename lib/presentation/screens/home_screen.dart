@@ -9,6 +9,7 @@ import '../../constants/strings.dart';
 import '../../constants/utils/date_time_utils.dart';
 import '../../constants/utils/padding_utils.dart';
 import '../../constants/utils/sized_box_utils.dart';
+import '../providers/task_providers.dart';
 import '../widgets/todo_items.dart';
 import 'create_task_screen.dart';
 
@@ -19,6 +20,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userTasksAsyncValue = ref.watch(userTasksProvider);
+
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -71,12 +74,22 @@ class HomeScreen extends ConsumerWidget {
               ),
               SizedBoxUtils.verticalMedium,
               Expanded(
-                // child: NoTasksFound(),
-                child: ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return const TodoItems();
+                child: userTasksAsyncValue.when(
+                  data: (userTasks) {
+                    if (userTasks.isEmpty) {
+                      return const NoTasksFound();
+                    } else {
+                      return ListView.builder(
+                        itemCount: userTasks.length,
+                        itemBuilder: (context, index) {
+                          final task = userTasks[index];
+                          return TodoItems(task: task);
+                        },
+                      );
+                    }
                   },
+                  loading: () => const CircularProgressIndicator.adaptive(),
+                  error: (error, stackTrace) => Text('Error: $error'),
                 ),
               ),
             ],
@@ -123,6 +136,9 @@ class NoTasksFound extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
+        SizedBoxUtils.verticalLarge,
+        SizedBoxUtils.verticalLarge,
+        SizedBoxUtils.verticalLarge,
       ],
     );
   }

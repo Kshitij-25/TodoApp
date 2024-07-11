@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -69,12 +71,19 @@ class Authenticator {
       if (!userSnapshot.exists) {
         await userDoc.set({
           'uid': user.uid,
-          'displayName': user.displayName ?? '',
-          'email': user.email ?? '',
+          'email': user.email,
+          'displayName': user.displayName,
+        }, SetOptions(merge: true)); // Merge options if you want to update without overwriting existing data
+
+        // Create a 'tasks' subcollection for the user
+        await userDoc.collection('tasks').doc().set({
+          'dummy': 'Initial task', // Example initial data for the tasks subcollection
         });
+
+        // Optional: Initialize other user-specific data
       }
     } catch (e) {
-      print('Error storing user in Firestore: $e');
+      log('Error storing user in Firestore: $e');
       rethrow;
     }
   }

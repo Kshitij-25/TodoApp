@@ -59,6 +59,7 @@ class CreateTaskScreen extends ConsumerWidget {
           description: _descriptionController.text,
           reminder: DateTimeUtils.formatTime(reminder),
           priority: priority,
+          taskStatus: '',
         );
         context.showSnackbar('Task created successfully');
         GoRouter.of(context).pop();

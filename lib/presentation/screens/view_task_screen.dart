@@ -1,17 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/constants/utils/date_time_utils.dart';
+import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
 import 'package:todo_app/constants/utils/sized_box_utils.dart';
 import 'package:todo_app/presentation/widgets/custom_button.dart';
 
 import '../../constants/utils/padding_utils.dart';
+import '../../data/backend/task_service.dart';
+import '../providers/task_providers.dart';
 
 class ViewTaskScreen extends ConsumerWidget {
-  const ViewTaskScreen({super.key});
+  ViewTaskScreen({
+    super.key,
+    this.task,
+  });
 
   static const routeName = '/viewTaskScreen';
+
+  final DocumentSnapshot<Object?>? task;
+
+  final _taskService = TaskService();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +54,7 @@ class ViewTaskScreen extends ConsumerWidget {
             children: [
               SizedBoxUtils.verticalMedium,
               Text(
-                'Go to Gym',
+                task?['title'] ?? '',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -75,6 +85,20 @@ class ViewTaskScreen extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                       ),
+                      SizedBoxUtils.verticalSmall,
+                      Text(
+                        'Purpose',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      SizedBoxUtils.verticalSmall,
+                      Text(
+                        'Reminder',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
                     ],
                   ),
                   SizedBoxUtils.horizontalLarge,
@@ -82,17 +106,27 @@ class ViewTaskScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        DateTimeUtils.formatDate(DateTime.now()),
+                        task?['scheduleDate'] ?? '',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       SizedBoxUtils.verticalSmall,
                       Text(
-                        '10:00Am - 12:00Pm',
+                        '${task?['startTime']} - ${task?['endTime']}',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       SizedBoxUtils.verticalSmall,
                       Text(
-                        'High',
+                        task?['priority'] ?? '',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      SizedBoxUtils.verticalSmall,
+                      Text(
+                        task?['purpose'] ?? '',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      SizedBoxUtils.verticalSmall,
+                      Text(
+                        task?['reminder'] != null ? 'Reminder set at ${task?['reminder']}' : 'No reminder set',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ],
@@ -108,13 +142,23 @@ class ViewTaskScreen extends ConsumerWidget {
               ),
               SizedBoxUtils.verticalMedium,
               Text(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+                task?['description'] ?? '',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Spacer(),
               CustomButton(
-                label: 'Save as Done',
-                onPressed: () {},
+                label: task?['taskStatus'] != 'Completed' ? 'Mark as Done' : ' Task Completed',
+                isEnabled: task?['taskStatus'] == 'Completed' ? false : true,
+                onPressed: () async {
+                  await _taskService.updateTaskCompletionStatus(
+                    userId: task!['userId'],
+                    taskId: task!['taskId'],
+                    taskStatus: 'Completed',
+                  );
+                  ref.invalidate(userTasksProvider);
+                  GoRouter.of(context).pop();
+                  context.showSnackbar('Task Completed');
+                },
               ),
             ],
           ),

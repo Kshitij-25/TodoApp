@@ -44,6 +44,7 @@ class HomeScreen extends ConsumerWidget {
               //   ),
               // ),
               IconButton(
+                tooltip: 'Logout',
                 onPressed: () async {
                   await ref.read(authStateNotifierProvider.notifier).logOut();
                   if (ref.read(authStateNotifierProvider) == LoginState.success) {
@@ -109,7 +110,7 @@ class HomeScreen extends ConsumerWidget {
                           );
                         }
                       },
-                      loading: () => const CircularProgressIndicator.adaptive(),
+                      loading: () => const Center(child: CircularProgressIndicator.adaptive()),
                       error: (error, stackTrace) => Text('Error: $error'),
                     ),
                   ),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:go_router/go_router.dart';
 import 'package:todo_app/data/backend/authenticator.dart';
@@ -36,7 +37,7 @@ class AppRoutes {
       GoRoute(
         name: HomeScreen.routeName,
         path: HomeScreen.routeName,
-        builder: (context, state) => HomeScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         name: CreateTaskScreen.routeName,
@@ -46,7 +47,9 @@ class AppRoutes {
       GoRoute(
         name: ViewTaskScreen.routeName,
         path: ViewTaskScreen.routeName,
-        builder: (context, state) => const ViewTaskScreen(),
+        builder: (context, state) => ViewTaskScreen(
+          task: state.extra as DocumentSnapshot<Object?>?,
+        ),
       ),
     ],
   );

@@ -22,16 +22,25 @@ class TodoItems extends StatelessWidget {
     final now = DateTime.now();
 
     // Parse string time to DateTime
-    DateTime parseTime(String timeStr) {
+    DateTime parseTime(String timeStr, DateTime date) {
       final List<String> parts = timeStr.split(':');
       final int hour = int.parse(parts[0]);
       final int minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
+      return DateTime(date.year, date.month, date.day, hour, minute);
+    }
+
+    DateTime parseDate(String dateStr) {
+      final List<String> parts = dateStr.split('-');
+      final int day = int.parse(parts[0]);
+      final int month = int.parse(parts[1]);
+      final int year = int.parse(parts[2]);
+      return DateTime(year, month, day);
     }
 
     // Retrieve and parse startTime and endTime
-    final DateTime startTime = parseTime(task?['startTime']);
-    final DateTime endTime = parseTime(task?['endTime']);
+    final DateTime scheduledDate = parseDate(task?['scheduleDate']);
+    final DateTime startTime = parseTime(task?['startTime'], scheduledDate);
+    final DateTime endTime = parseTime(task?['endTime'], scheduledDate);
 
     // Helper function to get the category icon based on purpose
     IconData getCategoryIcon(String purpose) {
@@ -45,9 +54,28 @@ class TodoItems extends StatelessWidget {
       return color;
     }
 
+    String getStatus() {
+      if (task?['taskStatus'] == 'Completed') {
+        return 'Completed';
+      } else if (task?['taskStatus'] == 'Expired') {
+        return 'Expired';
+      } else if (now.isBefore(startTime)) {
+        return 'Upcoming';
+      } else if (now.isAfter(endTime) && task?['isCompleted'] == true) {
+        return 'Completed';
+      } else if (now.year == scheduledDate.year &&
+          now.month == scheduledDate.month &&
+          now.day == scheduledDate.day + 1 &&
+          task?['isCompleted'] == false) {
+        return 'Expired';
+      } else {
+        return 'In Progress';
+      }
+    }
+
     return GestureDetector(
       onTap: () {
-        GoRouter.of(context).pushNamed(ViewTaskScreen.routeName);
+        GoRouter.of(context).pushNamed(ViewTaskScreen.routeName, extra: task);
       },
       child: Card(
         child: Padding(
@@ -73,7 +101,7 @@ class TodoItems extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: PaddingUtils.horizontalLarge,
+                padding: PaddingUtils.horizontalMedium,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -82,6 +110,7 @@ class TodoItems extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
+                      textScaler: const TextScaler.linear(0.9),
                     ),
                     Row(
                       children: [
@@ -124,11 +153,7 @@ class TodoItems extends StatelessWidget {
                   ),
                   SizedBoxUtils.verticalMedium,
                   Text(
-                    now.isBefore(startTime)
-                        ? 'Upcoming'
-                        : now.isAfter(endTime)
-                            ? 'Completed'
-                            : 'In Progress',
+                    getStatus(),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

@@ -13,16 +13,19 @@ class TaskService {
     required String description,
     required String reminder,
     required String priority,
+    required String taskStatus,
   }) async {
     try {
       // Get a reference to the user's document
       final userDocRef = _firestore.collection('users').doc(userId);
 
-      // Create a new task document inside the tasks subcollection
+      // Generate a new task document ID
       final taskDocRef = userDocRef.collection('tasks').doc();
+      final taskId = taskDocRef.id;
 
       // Set data for the task document
       await taskDocRef.set({
+        'taskId': taskId,
         'userId': userId,
         'scheduleDate': scheduleDate,
         'title': title,
@@ -32,6 +35,7 @@ class TaskService {
         'description': description,
         'reminder': reminder,
         'priority': priority,
+        'taskStatus': taskStatus,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -50,6 +54,76 @@ class TaskService {
     } catch (e) {
       print('Error retrieving user tasks: $e');
       rethrow;
+    }
+  }
+
+  Future<void> editTask({
+    required String userId,
+    required String taskId,
+    String? scheduleDate,
+    String? title,
+    String? purpose,
+    String? startTime,
+    String? endTime,
+    String? description,
+    String? reminder,
+    String? priority,
+    String? taskStatus,
+  }) async {
+    try {
+      // Get a reference to the user's task document
+      final taskDocRef = _firestore.collection('users').doc(userId).collection('tasks').doc(taskId);
+
+      // Create a map of the fields to update
+      Map<String, dynamic> updates = {};
+      if (scheduleDate != null) updates['scheduleDate'] = scheduleDate;
+      if (title != null) updates['title'] = title;
+      if (purpose != null) updates['purpose'] = purpose;
+      if (startTime != null) updates['startTime'] = startTime;
+      if (endTime != null) updates['endTime'] = endTime;
+      if (description != null) updates['description'] = description;
+      if (reminder != null) updates['reminder'] = reminder;
+      if (priority != null) updates['priority'] = priority;
+      if (taskStatus != null) updates['taskStatus'] = taskStatus;
+
+      // Update the task document
+      await taskDocRef.update(updates);
+    } catch (e) {
+      // Handle any errors here
+      throw 'Failed to edit task: $e';
+    }
+  }
+
+  Future<void> updateTaskCompletionStatus({
+    required String userId,
+    required String taskId,
+    required String taskStatus,
+  }) async {
+    try {
+      // Get a reference to the user's task document
+      final taskDocRef = _firestore.collection('users').doc(userId).collection('tasks').doc(taskId);
+
+      // Update the isCompleted field
+      await taskDocRef.update({'taskStatus': taskStatus});
+    } catch (e) {
+      // Handle any errors here
+      throw 'Failed to update task completion status: $e';
+    }
+  }
+
+  Future<void> deleteTask({
+    required String userId,
+    required String taskId,
+  }) async {
+    try {
+      // Get a reference to the user's task document
+      final taskDocRef = _firestore.collection('users').doc(userId).collection('tasks').doc(taskId);
+
+      // Delete the task document
+      await taskDocRef.delete();
+    } catch (e) {
+      // Handle any errors here
+      throw 'Failed to delete task: $e';
     }
   }
 }

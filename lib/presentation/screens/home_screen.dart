@@ -10,6 +10,7 @@ import '../../constants/strings.dart';
 import '../../constants/utils/date_time_utils.dart';
 import '../../constants/utils/padding_utils.dart';
 import '../../constants/utils/sized_box_utils.dart';
+import '../../data/backend/task_service.dart';
 import '../../data/models/login_state.dart';
 import '../providers/auth_state_notifer.dart';
 import '../providers/task_providers.dart';
@@ -105,12 +106,31 @@ class HomeScreen extends ConsumerWidget {
                             itemCount: userTasks.length,
                             itemBuilder: (context, index) {
                               final task = userTasks[index];
-                              return TodoItems(task: task);
+                              final taskService = TaskService();
+                              return TodoItems(
+                                task: task,
+                                confirmDismiss: () async {
+                                  await taskService.deleteTask(userId: task['userId'], taskId: task.id);
+                                  ref.invalidate(userTasksProvider);
+                                  return true;
+                                },
+                                // confirmCompleted: () async {
+                                //   await taskService.updateTaskCompletionStatus(
+                                //     userId: task['userId'],
+                                //     taskId: task['taskId'],
+                                //     taskStatus: 'Completed',
+                                //   );
+                                //   return true;
+                                // },
+                                onDismissed: () => ref.invalidate(userTasksProvider),
+                              );
                             },
                           );
                         }
                       },
-                      loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+                      loading: () => const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      ),
                       error: (error, stackTrace) => Text('Error: $error'),
                     ),
                   ),

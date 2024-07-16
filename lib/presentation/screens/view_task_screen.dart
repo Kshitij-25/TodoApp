@@ -35,15 +35,15 @@ class ViewTaskScreen extends ConsumerWidget {
           ),
           color: Theme.of(context).colorScheme.tertiaryContainer,
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.mode_edit_outlined,
-              size: 35,
-            ),
-            color: Theme.of(context).colorScheme.tertiaryContainer,
-          ),
+        actions: const [
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(
+          //     Icons.mode_edit_outlined,
+          //     size: 35,
+          //   ),
+          //   color: Theme.of(context).colorScheme.tertiaryContainer,
+          // ),
         ],
       ),
       body: SafeArea(

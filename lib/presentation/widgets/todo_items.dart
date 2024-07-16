@@ -13,9 +13,15 @@ class TodoItems extends StatelessWidget {
   const TodoItems({
     super.key,
     this.task,
+    required this.confirmDismiss,
+    this.confirmCompleted,
+    required this.onDismissed,
   });
 
   final DocumentSnapshot<Object?>? task;
+  final Future<bool> Function() confirmDismiss;
+  final Future<bool> Function()? confirmCompleted;
+  final VoidCallback onDismissed;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class TodoItems extends StatelessWidget {
         return 'Expired';
       } else if (now.isBefore(startTime)) {
         return 'Upcoming';
-      } else if (now.isAfter(endTime) && task?['isCompleted'] == true) {
+      } else if (now.isAfter(endTime) && task?['taskStatus'] == 'Completed') {
         return 'Completed';
       } else if (now.year == scheduledDate.year &&
           now.month == scheduledDate.month &&
@@ -77,88 +83,116 @@ class TodoItems extends StatelessWidget {
       onTap: () {
         GoRouter.of(context).pushNamed(ViewTaskScreen.routeName, extra: task);
       },
-      child: Card(
-        child: Padding(
-          padding: PaddingUtils.largePadding,
-          child: Row(
-            children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(120),
-                  color: getCategoryColor(task?['purpose']).withOpacity(0.3),
-                  border: Border.all(
-                    color: getCategoryColor(task?['purpose']),
-                    width: 2,
+      child: Dismissible(
+        direction: DismissDirection.endToStart,
+        key: Key(DateTime.now().toString()), // Ensure unique key for each item
+        confirmDismiss: (direction) async {
+          // if (direction == DismissDirection.endToStart) {
+          return await confirmDismiss();
+          // } else {
+          //   return await confirmCompleted!();
+          // }
+        },
+        onDismissed: (direction) {
+          if (direction == DismissDirection.endToStart) {
+            onDismissed;
+          }
+        },
+        background: Container(
+          color: Colors.green,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 20.0),
+          child: const Icon(CupertinoIcons.check_mark, color: Colors.white),
+        ),
+        secondaryBackground: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20.0),
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        child: Card(
+          child: Padding(
+            padding: PaddingUtils.largePadding,
+            child: Row(
+              children: [
+                Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(120),
+                    color: getCategoryColor(task?['purpose']).withOpacity(0.3),
+                    border: Border.all(
+                      color: getCategoryColor(task?['purpose']),
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      getCategoryIcon(task?['purpose']),
+                      color: getCategoryColor(task?['purpose']),
+                    ),
                   ),
                 ),
-                child: Center(
-                  child: Icon(
-                    getCategoryIcon(task?['purpose']),
-                    color: getCategoryColor(task?['purpose']),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: PaddingUtils.horizontalMedium,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task?['title'] ?? '',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                Padding(
+                  padding: PaddingUtils.horizontalMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task?['title'] ?? '',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        textScaler: const TextScaler.linear(0.9),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            CupertinoIcons.clock,
+                            size: 15,
                           ),
-                      textScaler: const TextScaler.linear(0.9),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          CupertinoIcons.clock,
-                          size: 15,
+                          SizedBoxUtils.horizontalSmall,
+                          Text(
+                            "${task?['startTime']} - ${task?['endTime']}",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        "Due Date: ${task?['scheduleDate']}",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryFixedDim,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: PaddingUtils.symmetric(horizontal: 10, vertical: 5),
+                        child: Text(
+                          task?['priority'] ?? '',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.black,
+                              ),
                         ),
-                        SizedBoxUtils.horizontalSmall,
-                        Text(
-                          "${task?['startTime']} - ${task?['endTime']}",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                      ),
                     ),
+                    SizedBoxUtils.verticalMedium,
                     Text(
-                      "Due Date: ${task?['scheduleDate']}",
+                      getStatus(),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
-              ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryFixedDim,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: PaddingUtils.symmetric(horizontal: 10, vertical: 5),
-                      child: Text(
-                        task?['priority'] ?? '',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.black,
-                            ),
-                      ),
-                    ),
-                  ),
-                  SizedBoxUtils.verticalMedium,
-                  Text(
-                    getStatus(),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

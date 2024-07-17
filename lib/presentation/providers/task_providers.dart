@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/backend/task_service.dart';
 
-final taskServiceProvider = Provider<TaskService>((ref) => TaskService());
+final taskServiceProvider = Provider.autoDispose<TaskService>((ref) => TaskService());
 
 final userTasksProvider = FutureProvider.autoDispose<List<DocumentSnapshot>>((ref) async {
   final taskService = ref.read(taskServiceProvider);

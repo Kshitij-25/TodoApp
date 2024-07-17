@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:todo_app/main.dart';
+import 'package:tasktrackr/main.dart';
 
 import '../models/login_state.dart';
 
@@ -81,9 +81,9 @@ class Authenticator {
         }, SetOptions(merge: true)); // Merge options if you want to update without overwriting existing data
 
         // Create a 'tasks' subcollection for the user
-        await userDoc.collection('tasks').doc().set({
-          'dummy': 'Initial task', // Example initial data for the tasks subcollection
-        });
+        // await userDoc.collection('tasks').doc().set({
+        //   'dummy': 'Initial task', // Example initial data for the tasks subcollection
+        // });
 
         // Optional: Initialize other user-specific data
       }

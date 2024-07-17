@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:todo_app/constants/app_routes.dart';
 
+import '../constants/app_routes.dart';
 import '../constants/theme/theme.dart';
 import '../constants/theme/util.dart';
 

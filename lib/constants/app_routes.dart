@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:go_router/go_router.dart';
-import 'package:todo_app/data/backend/authenticator.dart';
 
+import '../data/backend/authenticator.dart';
 import '../presentation/screens/create_task_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/login_screen.dart';

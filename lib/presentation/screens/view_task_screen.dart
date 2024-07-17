@@ -3,13 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
-import 'package:todo_app/constants/utils/sized_box_utils.dart';
-import 'package:todo_app/presentation/widgets/custom_button.dart';
+import 'package:tasktrackr/constants/extensions/snack_bar_ext.dart';
 
 import '../../constants/utils/padding_utils.dart';
+import '../../constants/utils/sized_box_utils.dart';
 import '../../data/backend/task_service.dart';
 import '../providers/task_providers.dart';
+import '../widgets/custom_button.dart';
 
 class ViewTaskScreen extends ConsumerWidget {
   ViewTaskScreen({

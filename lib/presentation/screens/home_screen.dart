@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:svg_flutter/svg_flutter.dart';
-import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
-import 'package:todo_app/main.dart';
+import 'package:tasktrackr/constants/extensions/snack_bar_ext.dart';
+import 'package:tasktrackr/main.dart';
 
 import '../../constants/assets.dart';
 import '../../constants/strings.dart';

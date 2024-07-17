@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/constants/assets.dart';
-import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
-import 'package:todo_app/data/models/login_state.dart';
-import 'package:todo_app/main.dart';
-import 'package:todo_app/presentation/providers/auth_state_notifer.dart';
-import 'package:todo_app/presentation/screens/home_screen.dart';
-import 'package:todo_app/presentation/widgets/custom_button.dart';
+import 'package:tasktrackr/constants/extensions/snack_bar_ext.dart';
+import 'package:tasktrackr/main.dart';
 
+import '../../constants/assets.dart';
 import '../../constants/utils/padding_utils.dart';
 import '../../constants/utils/sized_box_utils.dart';
+import '../../data/models/login_state.dart';
+import '../providers/auth_state_notifer.dart';
+import '../widgets/custom_button.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});

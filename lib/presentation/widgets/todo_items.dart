@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:todo_app/constants/utils/padding_utils.dart';
-import 'package:todo_app/constants/utils/sized_box_utils.dart';
-import 'package:todo_app/presentation/screens/view_task_screen.dart';
 
 import '../../constants/static_data/category_data.dart';
+import '../../constants/utils/padding_utils.dart';
+import '../../constants/utils/sized_box_utils.dart';
+import '../screens/view_task_screen.dart';
 
 // ignore: must_be_immutable
 class TodoItems extends StatelessWidget {

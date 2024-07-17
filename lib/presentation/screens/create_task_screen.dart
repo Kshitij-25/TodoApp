@@ -3,20 +3,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todo_app/constants/extensions/screen_size_ext.dart';
-import 'package:todo_app/constants/extensions/snack_bar_ext.dart';
-import 'package:todo_app/constants/static_data/category_data.dart';
-import 'package:todo_app/constants/utils/app_utility.dart';
-import 'package:todo_app/constants/utils/padding_utils.dart';
-import 'package:todo_app/constants/utils/validation_utils.dart';
-import 'package:todo_app/main.dart';
-import 'package:todo_app/presentation/widgets/custom_button.dart';
+import 'package:tasktrackr/constants/extensions/screen_size_ext.dart';
+import 'package:tasktrackr/constants/extensions/snack_bar_ext.dart';
+import 'package:tasktrackr/main.dart';
 
+import '../../constants/static_data/category_data.dart';
+import '../../constants/utils/app_utility.dart';
 import '../../constants/utils/date_time_utils.dart';
+import '../../constants/utils/padding_utils.dart';
 import '../../constants/utils/sized_box_utils.dart';
+import '../../constants/utils/validation_utils.dart';
 import '../../data/backend/task_service.dart';
 import '../providers/state_providers.dart';
 import '../providers/task_providers.dart';
+import '../widgets/custom_button.dart';
 import '../widgets/custom_text_form_field.dart';
 
 class CreateTaskScreen extends ConsumerWidget {
@@ -134,10 +134,14 @@ class CreateTaskScreen extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.tertiaryContainer,
                             ),
                             onPressed: () {
-                              _selectDate(context, (pickedDate) {
-                                ref.watch(scheduleDateProvider.notifier).state = pickedDate;
-                                pickedDate.log();
-                              });
+                              _selectDate(
+                                context,
+                                (pickedDate) {
+                                  ref.watch(scheduleDateProvider.notifier).state = pickedDate;
+                                  pickedDate.log();
+                                },
+                                ref,
+                              );
                             },
                           ),
                         ],
@@ -360,12 +364,12 @@ class CreateTaskScreen extends ConsumerWidget {
     );
   }
 
-  _selectDate(BuildContext context, void Function(DateTime) onDateTimeChanged) async {
+  _selectDate(BuildContext context, void Function(DateTime) onDateTimeChanged, WidgetRef ref) async {
     final ThemeData theme = Theme.of(context);
 
     switch (theme.platform) {
       case TargetPlatform.android:
-        return buildMaterialDatePicker(context);
+        return buildMaterialDatePicker(context, ref);
       case TargetPlatform.iOS:
         return buildCupertinoDatePicker(context, onDateTimeChanged);
       case TargetPlatform.fuchsia:
@@ -375,7 +379,7 @@ class CreateTaskScreen extends ConsumerWidget {
     }
   }
 
-  buildMaterialDatePicker(BuildContext context) async {
+  buildMaterialDatePicker(BuildContext context, WidgetRef ref) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -384,6 +388,7 @@ class CreateTaskScreen extends ConsumerWidget {
         const Duration(days: 365),
       ),
     );
+    ref.watch(scheduleDateProvider.notifier).state = picked;
   }
 
   buildCupertinoDatePicker(BuildContext context, void Function(DateTime) onDateTimeChanged) {

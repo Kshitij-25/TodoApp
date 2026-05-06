@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/app_routes.dart';
-import '../constants/theme/theme.dart';
-import '../constants/theme/util.dart';
+import '../presentation/providers/theme_provider.dart';
+import '../theme/app_theme.dart';
 
-class TodoApp extends StatelessWidget {
+class TodoApp extends ConsumerWidget {
   const TodoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
-    TextTheme textTheme = createTextTheme(context, "Roboto", "Roboto");
-
-    MaterialTheme theme = MaterialTheme(textTheme);
-
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: "TaskTrackr",
-      themeMode: ThemeMode.system,
-      darkTheme: theme.dark(),
-      theme: theme.light(),
+      title: 'TaskTrackr',
+      themeMode: themeMode,
+      darkTheme: AppTheme.dark,
+      theme: AppTheme.light,
       routeInformationParser: AppRoutes.router.routeInformationParser,
       routerDelegate: AppRoutes.router.routerDelegate,
       routeInformationProvider: AppRoutes.router.routeInformationProvider,

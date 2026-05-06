@@ -1,197 +1,226 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:svg_flutter/svg_flutter.dart';
-import 'package:tasktrackr/constants/extensions/snack_bar_ext.dart';
-import 'package:tasktrackr/main.dart';
+import 'package:intl/intl.dart';
 
-import '../../constants/assets.dart';
-import '../../constants/strings.dart';
-import '../../constants/utils/date_time_utils.dart';
-import '../../constants/utils/padding_utils.dart';
-import '../../constants/utils/sized_box_utils.dart';
-import '../../data/backend/task_service.dart';
-import '../../data/models/login_state.dart';
-import '../providers/auth_state_notifer.dart';
-import '../providers/task_providers.dart';
-import '../widgets/todo_items.dart';
-import 'create_task_screen.dart';
+import '../../data/backend/authenticator.dart';
+import '../../data/models/task_model.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
+import '../components/app_state_views.dart';
+import '../components/task_card.dart';
+import '../providers/task_provider.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
-
   static const routeName = '/homeScreen';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userTasksAsyncValue = ref.watch(userTasksProvider);
-    final logOutState = ref.watch(authStateNotifierProvider);
+    final theme = Theme.of(context);
+    final taskListAsync = ref.watch(taskListProvider);
+    final displayName = const Authenticator().displayName;
 
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            forceMaterialTransparency: true,
-            title: Text(
-              "TaskTrackr",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            centerTitle: false,
-            actions: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: Icon(
-              //     Theme.of(context).brightness == Brightness.light ? CupertinoIcons.moon_fill : CupertinoIcons.sun_max_fill,
-              //   ),
-              // ),
-              IconButton(
-                tooltip: 'Logout',
-                onPressed: () async {
-                  await ref.read(authStateNotifierProvider.notifier).logOut();
-                  if (ref.read(authStateNotifierProvider) == LoginState.success) {
-                    GoRouter.of(context).goNamed(HomeScreen.routeName);
-                    context.showSnackbar('User Logged Out.');
-                  } else {
-                    ref.read(authStateNotifierProvider).log();
-                    context.showSnackbar('Something went wrong');
-                  }
-                },
-                icon: const Icon(
-                  Icons.logout,
-                ),
-              )
-            ],
-          ),
-          body: SafeArea(
-            child: Padding(
-              padding: PaddingUtils.horizontalMedium,
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: taskListAsync.when(
+          data: (tasks) {
+            final now = DateTime.now();
+            final todayTasks = tasks
+                .where((t) =>
+                    DateUtils.isSameDay(t.dueDate, now) && !t.isCompleted)
+                .toList();
+
+            final upcomingTasks = tasks
+                .where((t) =>
+                    t.dueDate.isAfter(now) &&
+                    !DateUtils.isSameDay(t.dueDate, now) &&
+                    !t.isCompleted)
+                .toList();
+
+            final completedToday = tasks
+                .where(
+                    (t) => DateUtils.isSameDay(t.dueDate, now) && t.isCompleted)
+                .length;
+
+            final totalToday =
+                tasks.where((t) => DateUtils.isSameDay(t.dueDate, now)).length;
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.space4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    Strings.readyForTasks,
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "Today's",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                        child: Text(
-                          DateTimeUtils.formatDay(
-                            DateTime.now(),
-                          ),
-                        ),
-                      )
+                  _buildHeader(context, displayName),
+                  const SizedBox(height: AppSpacing.space6),
+                  _buildProgressCard(completedToday, totalToday),
+                  const SizedBox(height: AppSpacing.space8),
+                  if (todayTasks.isEmpty && upcomingTasks.isEmpty)
+                    const AppEmptyState(
+                      title: 'No tasks for today',
+                      subtitle: 'Enjoy your free time or plan your next goal!',
+                      iconData: Icons.wb_sunny_outlined,
+                    )
+                  else ...[
+                    if (todayTasks.isNotEmpty) ...[
+                      _buildSectionTitle(context, 'TODAY'),
+                      const SizedBox(height: AppSpacing.space4),
+                      ...todayTasks
+                          .map((task) => _buildTaskCard(context, ref, task)),
                     ],
-                  ),
-                  Text(
-                    DateTimeUtils.formatDate(
-                      DateTime.now(),
-                    ),
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                  SizedBoxUtils.verticalMedium,
-                  Expanded(
-                    child: userTasksAsyncValue.when(
-                      data: (userTasks) {
-                        if (userTasks.isEmpty) {
-                          return const NoTasksFound();
-                        } else {
-                          return ListView.builder(
-                            itemCount: userTasks.length,
-                            itemBuilder: (context, index) {
-                              final task = userTasks[index];
-                              final taskService = TaskService();
-                              return TodoItems(
-                                task: task,
-                                confirmDismiss: () async {
-                                  await taskService.deleteTask(userId: task['userId'], taskId: task.id);
-                                  ref.invalidate(userTasksProvider);
-                                  return true;
-                                },
-                                // confirmCompleted: () async {
-                                //   await taskService.updateTaskCompletionStatus(
-                                //     userId: task['userId'],
-                                //     taskId: task['taskId'],
-                                //     taskStatus: 'Completed',
-                                //   );
-                                //   return true;
-                                // },
-                                onDismissed: () => ref.invalidate(userTasksProvider),
-                              );
-                            },
-                          );
-                        }
-                      },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator.adaptive(),
-                      ),
-                      error: (error, stackTrace) => Text('Error: $error'),
-                    ),
-                  ),
+                    const SizedBox(height: AppSpacing.space4),
+                    if (upcomingTasks.isNotEmpty) ...[
+                      _buildSectionTitle(context, 'UPCOMING'),
+                      const SizedBox(height: AppSpacing.space4),
+                      ...upcomingTasks
+                          .take(3)
+                          .map((task) => _buildTaskCard(context, ref, task)),
+                    ],
+                  ],
                 ],
               ),
-            ),
+            );
+          },
+          loading: () =>
+              const Center(child: CircularProgressIndicator.adaptive()),
+          error: (err, stack) => AppErrorState(
+            error: err.toString(),
+            onRetry: () => ref.invalidate(taskListProvider),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              GoRouter.of(context).pushNamed(CreateTaskScreen.routeName);
-            },
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            child: Icon(
-              Icons.add,
-              color: Theme.of(context).colorScheme.onInverseSurface,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(BuildContext context, WidgetRef ref, TaskModel task) {
+    return TaskCard(
+      title: task.title,
+      date: DateFormat('h:mm a').format(task.dueDate),
+      priority: task.priority,
+      category: task.category,
+      isCompleted: task.isCompleted,
+      onToggle: (val) {
+        ref
+            .read(taskActionsProvider)
+            .toggleTaskCompletion(task.id, val ?? false);
+      },
+      onDelete: () {
+        ref.read(taskActionsProvider).deleteTask(task.id);
+      },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, String name) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Good morning 👋',
+              style: AppTypography.body.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+            ),
+            Text(
+              name.isEmpty ? 'User' : name.split(' ')[0],
+              style: AppTypography.heading1.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        InkWell(
+          onTap: () => context.pushNamed(ProfileScreen.routeName),
+          borderRadius: BorderRadius.circular(24),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: theme.colorScheme.primary,
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : 'U',
+              style: AppTypography.label
+                  .copyWith(color: theme.colorScheme.onPrimary),
             ),
           ),
         ),
-        if (logOutState == LoginState.loading)
-          Container(
-            color: Colors.black87,
-            child: Center(
-              child: CircularProgressIndicator.adaptive(
-                backgroundColor: Theme.of(context).indicatorColor,
-              ),
-            ),
-          ),
       ],
     );
   }
-}
 
-class NoTasksFound extends StatelessWidget {
-  const NoTasksFound({
-    super.key,
-  });
+  Widget _buildProgressCard(int completed, int total) {
+    final progress = total == 0 ? 0.0 : completed / total;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.space6),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: AppRadius.borderRadiusLg,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'TODAY\'S PROGRESS',
+            style: AppTypography.label.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          Text(
+            '$completed / $total tasks done',
+            style: AppTypography.heading2.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SvgPicture.asset(
-          Assets.emptyFolder,
-          height: 100,
-        ),
-        SizedBoxUtils.verticalMedium,
-        Opacity(
-          opacity: 0.2,
-          child: Text(
-            'No Tasks Found',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
+        Text(
+          title,
+          style: AppTypography.label.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            letterSpacing: 1.1,
           ),
         ),
-        SizedBoxUtils.verticalLarge,
-        SizedBoxUtils.verticalLarge,
-        SizedBoxUtils.verticalLarge,
+        TextButton(
+          onPressed: () {},
+          child: Text(
+            'See all',
+            style:
+                AppTypography.label.copyWith(color: theme.colorScheme.primary),
+          ),
+        ),
       ],
     );
   }

@@ -1,10 +1,42 @@
-// import 'package:flutter/material.dart';
-// import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
 
-// class ThemeService {
-//   void toggleTheme(BuildContext context, ThemeMode mode, WidgetRef ref) {
-//     ref.read(themeProvider.notifier).state = mode;
-//   }
-// }
+final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return ThemeNotifier(prefs);
+});
+
+class ThemeNotifier extends StateNotifier<ThemeMode> {
+  ThemeNotifier(this._prefs) : super(ThemeMode.system) {
+    _loadTheme();
+  }
+
+  final SharedPreferences _prefs;
+  static const _themeKey = 'theme_mode';
+
+  void _loadTheme() {
+    final themeIndex = _prefs.getInt(_themeKey);
+    if (themeIndex != null) {
+      state = ThemeMode.values[themeIndex];
+    }
+  }
+
+  Future<void> toggleTheme() async {
+    if (state == ThemeMode.dark) {
+      state = ThemeMode.light;
+    } else {
+      state = ThemeMode.dark;
+    }
+    await _prefs.setInt(_themeKey, state.index);
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    state = mode;
+    await _prefs.setInt(_themeKey, state.index);
+  }
+}

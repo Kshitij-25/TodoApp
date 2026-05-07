@@ -17,6 +17,14 @@ class TaskRepository {
     });
   }
 
+  Stream<bool> getSyncStatus(String userId) {
+    return _firestore
+        .collection(_collection)
+        .where('userId', isEqualTo: userId)
+        .snapshots(includeMetadataChanges: true)
+        .map((snapshot) => snapshot.metadata.hasPendingWrites);
+  }
+
   Future<void> addTask(TaskModel task) {
     return _firestore.collection(_collection).add(task.toFirestore());
   }

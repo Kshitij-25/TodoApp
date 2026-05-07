@@ -1,5 +1,6 @@
 import 'dart:developer' as devtools show log;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,12 @@ void main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
     }
+
+    // Enable Firestore offline persistence
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
 
     // Initialize Notification Service
     final notificationService = NotificationService();

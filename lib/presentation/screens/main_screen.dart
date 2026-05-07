@@ -7,15 +7,18 @@ import 'home_screen.dart';
 import 'insights_screen.dart';
 import 'task_list_screen.dart';
 
-class MainScreen extends StatefulWidget {
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../components/sync_indicator.dart';
+
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
   static const routeName = '/main';
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -28,9 +31,21 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+          const Positioned(
+            top: 50,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SyncIndicator(),
+            ),
+          ),
+        ],
       ),
       extendBody: true,
       floatingActionButton: AppFab(

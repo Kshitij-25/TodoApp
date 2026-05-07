@@ -15,6 +15,7 @@ class TaskCard extends StatefulWidget {
     required this.priority,
     required this.category,
     this.isCompleted = false,
+    this.isPending = false,
     this.onTap,
     this.onToggle,
     this.onEdit,
@@ -25,6 +26,7 @@ class TaskCard extends StatefulWidget {
   final String priority;
   final String category;
   final bool isCompleted;
+  final bool isPending;
   final VoidCallback? onTap;
   final ValueChanged<bool?>? onToggle;
   final VoidCallback? onEdit;
@@ -225,6 +227,16 @@ class _TaskCardState extends State<TaskCard>
                                         const SizedBox(
                                             width: AppSpacing.space2),
                                         AppBadge(label: widget.category),
+                                        if (widget.isPending) ...[
+                                          const SizedBox(
+                                              width: AppSpacing.space2),
+                                          Icon(
+                                            Icons.cloud_upload_outlined,
+                                            size: 14,
+                                            color: theme.colorScheme.primary
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ],

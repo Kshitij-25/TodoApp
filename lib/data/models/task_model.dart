@@ -10,6 +10,7 @@ class TaskModel {
     required this.category,
     this.isCompleted = false,
     required this.userId,
+    this.isPending = false,
   });
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +24,7 @@ class TaskModel {
       category: data['category'] ?? 'General',
       isCompleted: data['isCompleted'] ?? false,
       userId: data['userId'] ?? '',
+      isPending: doc.metadata.hasPendingWrites,
     );
   }
   final String id;
@@ -33,6 +35,7 @@ class TaskModel {
   final String category;
   final bool isCompleted;
   final String userId;
+  final bool isPending;
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -55,6 +58,7 @@ class TaskModel {
     String? category,
     bool? isCompleted,
     String? userId,
+    bool? isPending,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -65,6 +69,7 @@ class TaskModel {
       category: category ?? this.category,
       isCompleted: isCompleted ?? this.isCompleted,
       userId: userId ?? this.userId,
+      isPending: isPending ?? this.isPending,
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tasktrackr/data/models/login_state.dart';
+import 'package:tasktrackr/presentation/providers/auth_state_notifer.dart';
 
 import '../../data/backend/authenticator.dart';
 import '../../data/models/task_model.dart';
@@ -9,8 +11,9 @@ final taskRepositoryProvider = Provider((ref) => TaskRepository());
 final taskListProvider = StreamProvider<List<TaskModel>>((ref) {
   final repository = ref.watch(taskRepositoryProvider);
   final userId = const Authenticator().userId;
+  final loginState = ref.watch(authStateNotifierProvider);
 
-  if (userId == null) {
+  if (userId == null || loginState != LoginState.success) {
     return Stream.value([]);
   }
 

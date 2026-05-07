@@ -8,7 +8,10 @@ final authStateNotifierProvider = StateNotifierProvider<AuthStateNotifier, Login
 );
 
 class AuthStateNotifier extends StateNotifier<LoginState> {
-  AuthStateNotifier() : super(LoginState.idle);
+  AuthStateNotifier()
+      : super(const Authenticator().isAlreadyLoggedIn
+            ? LoginState.success
+            : LoginState.idle);
 
   final _authenticator = const Authenticator();
 

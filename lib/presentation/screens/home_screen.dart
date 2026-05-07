@@ -102,6 +102,7 @@ class HomeScreen extends ConsumerWidget {
       priority: task.priority,
       category: task.category,
       isCompleted: task.isCompleted,
+      isPending: task.isPending,
       onToggle: (val) {
         ref
             .read(taskActionsProvider)

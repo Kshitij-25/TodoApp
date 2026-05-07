@@ -70,10 +70,15 @@ class Authenticator {
       
       if (user != null) {
         log('Google Login Success: ${user.uid}');
-        // Store in Firestore but don't block navigation if it fails
-        _storeUserInFirestore(user).catchError((e) {
-          log('Non-blocking Firestore storage error: $e');
-        });
+        // Wait for Firestore to store user info before proceeding
+        // This prevents race conditions where the home screen tries to fetch data
+        // before the user document exists, which can trigger permission errors
+        // if security rules depend on the user document.
+        try {
+          await _storeUserInFirestore(user);
+        } catch (e) {
+          log('Firestore storage error (continuing anyway): $e');
+        }
         return LoginState.success;
       }
       return LoginState.error;
